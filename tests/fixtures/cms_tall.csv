@@ -1,0 +1,7 @@
+hospital_name,last_updated_on,version,hospital_location,license_number|OH
+TEST GENERAL HOSPITAL,2026-01-15,2.0.0,TEST GENERAL HOSPITAL,1234
+description,code|1,code|1|type,billing_class,setting,standard_charge|gross,standard_charge|discounted_cash,payer_name,plan_name,standard_charge|negotiated_dollar,standard_charge|negotiated_percentage,estimated_amount,standard_charge|methodology,standard_charge|min,standard_charge|max
+MRI BRAIN W/O,70551,CPT,facility,outpatient,3200,1900,Anthem BCBS,Commercial PPO,1450,,,fee schedule,410,2600
+MRI BRAIN W/O,70551,CPT,facility,outpatient,3200,1900,Medical Mutual of Ohio,PPO,1180,,,fee schedule,410,2600
+CBC W/ DIFF,85025,CPT,facility,outpatient,95,48,Anthem BCBS,Commercial PPO,17.30,,,fee schedule,7,66
+WIDGET,99999,CPT,facility,outpatient,10,5,Anthem BCBS,Commercial PPO,4,,,fee schedule,1,9

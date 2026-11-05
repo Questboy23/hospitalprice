@@ -1,0 +1,122 @@
+# Deterministic payer normalization rules. ORDERED: first match wins.
+#
+# Every rule is hand-written, version-controlled, and carries an author and a
+# rationale. The matching rule id is stamped on every price row, so any merge
+# is inspectable and reversible.
+#
+# String similarity NEVER merges (PREREGISTRATION §5.3). It only proposes
+# candidates for the human review queue.
+#
+# Normalization unit is (parent_entity x product_line x state). Network variants
+# within a product line are within-payer variation and are NOT collapsed into
+# the payer identity.
+#
+# confidence: certain   -> unambiguous brand + product
+#             probable  -> brand certain, product inferred from conventional naming
+#             ambiguous -> brand or product genuinely unclear; reported separately
+meta:
+  author: R.
+  created: 2026-09-02
+  unit: parent_entity x product_line x state
+
+rules:
+  # --- Medicare Advantage must be caught BEFORE the commercial brand rules, ---
+  # --- otherwise "Anthem MA HMO" is silently scored as a commercial rate.    ---
+  - id: ma_generic
+    pattern: '(?i)\b(medicare\s*advantage|\bMA\b|medicare\s*(hmo|ppo)|senior\s*(advantage|care)|advantage\s*plan)\b'
+    plan_type: medicare_advantage
+    confidence: certain
+    note: "MA rates are not comparable to commercial PPO rates; prereg §5 requires separation."
+
+  - id: medicaid_generic
+    pattern: '(?i)\b(medicaid|caresource|molina|buckeye\s*(health)?|paramount\s*advantage|united\s*healthcare\s*community|humana\s*healthy\s*horizons|anthem\s*(oh)?\s*medicaid)\b'
+    plan_type: medicaid_mco
+    confidence: certain
+
+  - id: anthem
+    pattern: '(?i)\b(anthem|blue\s*cross|bcbs|blue\s*shield|elevance)\b'
+    parent_entity: Elevance Health
+    brand: Anthem BCBS
+    plan_type: commercial
+    confidence: certain
+
+  - id: medmutual
+    pattern: '(?i)\bmedical\s*mutual|\bmmo\b|medmutual'
+    parent_entity: Medical Mutual of Ohio
+    brand: Medical Mutual
+    plan_type: commercial
+    confidence: certain
+
+  - id: uhc
+    pattern: '(?i)\b(united\s*health\s*care|unitedhealthcare|\bUHC\b|united\s*health|optum)\b'
+    parent_entity: UnitedHealth Group
+    brand: UnitedHealthcare
+    plan_type: commercial
+    confidence: certain
+
+  - id: aetna
+    pattern: '(?i)\b(aetna|\bcvs\s*health\b)\b'
+    parent_entity: CVS Health
+    brand: Aetna
+    plan_type: commercial
+    confidence: certain
+
+  - id: cigna
+    pattern: '(?i)\b(cigna|evernorth|great\s*west)\b'
+    parent_entity: Cigna
+    brand: Cigna
+    plan_type: commercial
+    confidence: certain
+
+  - id: humana
+    pattern: '(?i)\bhumana\b'
+    parent_entity: Humana
+    brand: Humana
+    plan_type: commercial
+    confidence: probable
+    note: "Humana's Ohio book is heavily MA; rows not caught by ma_generic are flagged for rate-level review."
+
+  - id: paramount
+    pattern: '(?i)\bparamount\b'
+    parent_entity: ProMedica
+    brand: Paramount
+    plan_type: commercial
+    confidence: probable
+
+  - id: summacare
+    pattern: '(?i)\bsumma\s*care|summacare'
+    parent_entity: Summa Health
+    brand: SummaCare
+    plan_type: commercial
+    confidence: certain
+
+  - id: thehealthplan
+    pattern: '(?i)\bthe\s*health\s*plan\b|\bTHP\b'
+    parent_entity: The Health Plan
+    brand: The Health Plan
+    plan_type: commercial
+    confidence: probable
+
+  - id: tricare
+    pattern: '(?i)\b(tricare|champva|va\s*community\s*care)\b'
+    parent_entity: Federal
+    brand: TRICARE/VA
+    plan_type: other
+    confidence: certain
+
+  - id: workers_comp
+    pattern: '(?i)\b(workers?\s*comp|\bBWC\b|bureau\s*of\s*workers)\b'
+    parent_entity: Ohio BWC
+    brand: Workers Compensation
+    plan_type: other
+    confidence: certain
+    note: "Statutory fee schedule, not a negotiated commercial rate. Excluded from dispersion."
+
+  # --- Third-party networks are rentable access, not risk-bearing payers. ---
+  - id: network_rental
+    pattern: '(?i)\b(multiplan|phcs|first\s*health|three\s*rivers|hst\b|zelis|galaxy\s*health)\b'
+    parent_entity: Network Rental
+    brand: TPA/Network
+    plan_type: other
+    confidence: probable
+    note: "Rented network rates; not a direct hospital-payer contract. Analyzed separately."
